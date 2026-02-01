@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Autoclicker (Chromebook Safe)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: #eee;
+        text-align: center;
+        padding: 30px;
+    }
+    input, button {
+        font-size: 16px;
+        margin: 8px;
+        padding: 6px 10px;
+    }
+    .box {
+        border: 1px solid #444;
+        padding: 20px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Autoclicker</h2>
+
+    <label>
+        Clicks per second:
+        <input type="number" id="cps" value="10" min="1" max="1000">
+    </label>
+    <br>
+
+    <button onclick="startClicker()">Start</button>
+    <button onclick="stopClicker()">Stop</button>
+
+    <p><b>Hotkey:</b> Ctrl + Shift + S</p>
+    <p id="status">Status: stopped</p>
+</div>
+
+<script>
+let interval = null;
+let running = false;
+let mouseX = 0;
+let mouseY = 0;
+
+// Track mouse position
+document.addEventListener("mousemove", e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+function startClicker() {
+    if (running) return;
+
+    const cps = Number(document.getElementById("cps").value);
+    const delay = 1000 / cps;
+
+    interval = setInterval(() => {
+        const el = document.elementFromPoint(mouseX, mouseY);
+        if (el) el.click();
+    }, delay);
+
+    running = true;
+    document.getElementById("status").textContent = "Status: running";
+}
+
+function stopClicker() {
+    if (!running) return;
+
+    clearInterval(interval);
+    interval = null;
+    running = false;
+    document.getElementById("status").textContent = "Status: stopped";
+}
+
+// Chromebook-safe hotkey: Ctrl + Shift + S
+document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.shiftKey && e.code === "KeyS") {
+        e.preventDefault();
+        running ? stopClicker() : startClicker();
+    }
+});
+
+// Attempt to open in a new window
+window.onload = () => {
+    if (!window.opener && !window.name) {
+        window.open(
+            location.href,
+            "AutoclickerWindow",
+            "width=400,height=350"
+        );
+    }
+};
+</script>
+
+</body>
+</html>
